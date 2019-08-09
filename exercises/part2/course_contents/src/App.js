@@ -1,26 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useState} from 'react'
+import Course from './components/Course'
 
-function App() {
+const Button = ({onClick, text}) => (
+  <button onClick={onClick}>
+    {text}
+  </button>
+)
+
+const Display = ({counter}) => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <div>{counter}</div>
+  )
 }
 
-export default App;
+const App = ({courses}) => {
+  const [counter, setCounter] = useState(0)
+
+  console.log("Counter " + counter)
+
+  const setToValue = (value) => {
+    return () =>{
+      setCounter(value)
+    }
+  }
+
+  const courseComponents = () => (
+    courses.map(
+      course => <Course 
+          key={course.id} 
+          course={course}
+        />
+    )
+  )
+
+  return (
+    <div>
+      {courseComponents()}
+    </div>
+  )
+}
+
+export default App
