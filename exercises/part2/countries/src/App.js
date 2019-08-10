@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'
 
-const CountryDetailed = ({ country, weather }) => {
+const CountryDetailed = ({ country, weatherInfo }) => {
+
   const langs = country.languages.map((lang, i) => <li key={i}>{lang.name}</li>)
-  console.log(weather)
-  
+  console.log(weatherInfo)
+
+  const weatherBody = () => {
+    if (weatherInfo.main !== undefined) {
+      return (
+        <div>
+          <h2>Weather in {country.capital}</h2>
+          <h3>temperature: </h3>
+          <p>{weatherInfo.main.temp} Celsius</p>
+
+          <h3>wind: </h3>
+          <p>{weatherInfo.wind.speed} kph direction {weatherInfo.wind.deg}</p>
+        </div>
+      )
+    }
+    return (<p>No weather data avaible | Weather information is not avaible in auto display, please select country by buttons</p>)
+  }
+
   return (
     <div>
       <h1>{country.name}</h1>
@@ -13,12 +30,7 @@ const CountryDetailed = ({ country, weather }) => {
       <h2>Languages</h2>
       <ul>{langs}</ul>
       <img src={country.flag} alt={`Flag of ${country.name}`} />
-      <h2>Weather in {country.capital}</h2>
-      <h3>temperature: </h3>
-      <p>{weather.main.temp} Celsius</p>
-
-      <h3>wind: </h3>
-      <p>{weather.wind.speed} kph direction {weather.wind.deg}</p>
+      {weatherBody()}
     </div>
   )
 }
@@ -63,46 +75,7 @@ const CountryList = ({ countries, onClick }) => {
 
 const App = () => {
   const [countries, setCountries] = useState([])
-  const [weatherInfo, setWeatherInfo] = useState(
-    {
-      "weather": [
-        {
-          "id": 800,
-          "main": "Clear",
-          "description": "clear sky",
-          "icon": "01n"
-        }
-      ],
-      "base": "stations",
-      "main": {
-        "temp": 289.92,
-        "pressure": 1009,
-        "humidity": 92,
-        "temp_min": 288.71,
-        "temp_max": 290.93
-      },
-      "wind": {
-        "speed": 0.47,
-        "deg": 107.538
-      },
-      "clouds": {
-        "all": 2
-      },
-      "dt": 1560350192,
-      "sys": {
-        "type": 3,
-        "id": 2019346,
-        "message": 0.0065,
-        "country": "JP",
-        "sunrise": 1560281377,
-        "sunset": 1560333478
-      },
-      "timezone": 32400,
-      "id": 1851632,
-      "name": "Shuzenji",
-      "cod": 200
-    })
-
+  const [weatherInfo, setWeatherInfo] = useState({})
   const [filter, setFilter] = useState('')
   const [idFilter, setIdFilter] = useState('-1')
 
@@ -125,10 +98,16 @@ const App = () => {
     const id = event.target.getAttribute('id')
     console.log(`Selected country is ${id}`)
     setIdFilter(event.target.getAttribute('id'))
+    const country = countries.find(c => c.numericCode === id)
+    axios
+      .get(`http://api.openweathermap.org/data/2.5/weather?q=${country.capital},${country.alpha3Code}&appid=77217d112d239bc7f904ebaa4f2f9382&units=metric`)
+      .then(response => {
+        setWeatherInfo(response.data)
+      }
+      )
   }
 
   const filteredCountries = () => {
-
     if (idFilter !== '-1') {
       return countries.filter(e => e.numericCode === idFilter)
     }
@@ -139,7 +118,7 @@ const App = () => {
   const countryView = () => {
     if (f.length === 1) {
       const country = f[0]
-      return <CountryDetailed country={country} weather={weatherInfo} />
+      return <CountryDetailed country={country} weatherInfo={weatherInfo} />
     }
     return <CountryList countries={f} onClick={onCountrySelect} />
   }
