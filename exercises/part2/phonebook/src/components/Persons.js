@@ -2,10 +2,10 @@ import React from 'react'
 
 const Entry = ({ person, deleteHandler }) => {
   return (
-    <div>
-      <p>{person.name} {person.number}</p>
+    <li className='person' id={person.id}>
+      {person.name} {person.number}
       <button id={person.id} onClick={deleteHandler}>delete</button>
-    </div>
+    </li>
   )
 }
 
@@ -14,7 +14,9 @@ const Persons = ({ persons, deleteHandler }) => {
   return (
     <div>
       <h2>Numbers</h2>
-      {entries}
+      <ul>
+        {entries}
+      </ul>
     </div>
   )
 }

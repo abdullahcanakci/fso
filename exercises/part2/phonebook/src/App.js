@@ -10,6 +10,11 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState({
+    visible: false,
+    name: '',
+    success: ''
+  })
 
   useEffect(() => {
     networkService
@@ -47,12 +52,28 @@ const App = () => {
       console.log(`${id} of person to be updated`)
       networkService
         .update(id, newPerson)
-        .then(updated => setPersons(persons.map(p => p.id !== updated.id ? p : updated)))
+        .then(response => {
+          const updatedPerson = response.data
+          setNotification({
+            success: response.status === 200,
+            visible: true,
+            message: response.status === 200 ? `Updated ${updatedPerson.name}` : `Can't update ${newPerson.name}`
+          })
+          setPersons(persons.map(p => p.id !== updatedPerson.id ? p : updatedPerson))
+        })
     } else {
       networkService
         .create(newPerson)
-        .then(newPerson => {
-          setPersons(persons.concat(newPerson))
+        .then(response => {
+          console.log(response)
+          const respPerson = response.data
+          console.log(respPerson)
+          setNotification({
+            visible: true,
+            success: response.status === 201,
+            message: response.status === 201 ? `Added ${respPerson.name}` : `Can't add ${newPerson.name}`
+          })
+          setPersons(persons.concat(respPerson))
         }
       )
     }
@@ -63,18 +84,48 @@ const App = () => {
   const handleDelete = (event) => {
     event.preventDefault()
     const id = event.target.getAttribute('id')
-    console.log(id)
-    const person = persons.find(p => p.id === id)
+
+    const person = persons.find(p => p.id == id)
+
     if (window.confirm(`Delete ${person.name}`)) {
       networkService
-        .deletePerson(person.id)
+        .deletePerson(id)
+        .then(response => {
+          if(response.status === 200){
+            setNotification({
+              success: true,
+              visible: true,
+              message: `${person.name} is deleted`
+            })
+            setPersons(persons.filter(p => p.id !== id))
+          }
+        })
+        .catch(err => {
+          setNotification({
+            success: false,
+            visible: true,
+            message: `${person.name} can not be deleted`
+          })
+          setPersons(persons.filter(p => p.id !== id))
+        })
     }
-    setPersons(persons.filter(p => p.id !== person.id))
   }
 
+  const notificationView = () => {
+    if(!notification.visible){
+      return (<></>)
+    }
+    const type = notification.success ? 'success' : 'fail'
+    setTimeout(() => {setNotification({visible: false})}, 3000);
+    return (
+      <p className={'notification ' + type}>{notification.message}</p>
+    )
+  }
+  
   return (
     <div>
       <h2>Phonebook</h2>
+      {notificationView()}
       <Filter filterState={filter} onChangeListener={onFilter} />
       <PersonForm
         onNameInputChange={onNameInputChange}
@@ -83,7 +134,7 @@ const App = () => {
         number={newNumber}
         name={newName}
       />
-      <Persons persons={persons.filter(e => e.name.indexOf(filter) !== -1)} deleteHandler={handleDelete} />
+      <Persons persons={persons.filter(p => p.name.indexOf(filter) !== -1)} deleteHandler={handleDelete} />
     </div>
   )
 }
