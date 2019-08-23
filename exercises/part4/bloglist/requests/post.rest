@@ -1,0 +1,9 @@
+post http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+    "title": "Front page of the web",
+    "author": "i3c",
+    "url": "example.com",
+    "likes": "50"
+}
