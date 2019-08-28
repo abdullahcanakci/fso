@@ -2,14 +2,23 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const User = require('../models/user')
-
 const api = supertest(app)
+
+const getToken = async (username, password) => {
+  const response = await api
+    .post('/api/login')
+    .send({ username: 'root', password: 'password' })
+
+  return response.body.token
+}
 
 describe('When there is 1 initial user at db', () => {
   beforeEach(async () => {
     await User.deleteMany({})
-    const user = new User({ username: 'root', password: 'password' })
-    await user.save()
+    const user = { username: 'root', password: 'password' }
+    await api
+      .post('/api/users')
+      .send(user)
   })
 
   test('can access user at db', async () => {
@@ -18,7 +27,10 @@ describe('When there is 1 initial user at db', () => {
   })
 
   test('User password has is not accessible', async () => {
-    const initialUsers = await User.find({})
+    const response = await api
+      .get('/api/users')
+      .send()
+    const initialUsers = response.body
     expect(initialUsers[0].passwordHash).not.toBeDefined()
   })
 
@@ -64,19 +76,18 @@ describe('When there is 1 initial user at db', () => {
   })
 
   test('blog attaching to user is successfull', async () => {
-    const users = await User.find({})
-    const userId = users[0]._id.toString()
+    const token = await getToken('root', 'password')
 
     const newBlog = {
-      title: 'test title',
-      author: 'test author',
-      url: 'testurl',
-      likes: 0,
-      userId: userId
+      title: 'New Entry Title',
+      author: 'New entry author',
+      url: 'new url',
+      likes: 10
     }
 
     const response = await api
       .post('/api/blogs')
+      .set({ Authorization: `bearer ${token}` })
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)

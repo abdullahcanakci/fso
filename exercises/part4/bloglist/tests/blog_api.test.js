@@ -4,9 +4,16 @@ const app = require('../app')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const dummyData = require('./dummy_data')
-const logger = require('../utils/logger')
 
 const api = supertest(app)
+
+const getToken = async (username, password) => {
+  const response = await api
+    .post('/api/login')
+    .send({ username: 'root', password: 'password' })
+
+  return response.body.token
+}
 
 test('blogs are returned as json', async () => {
   await api
@@ -37,19 +44,18 @@ test('id field is avaible', async () => {
 
 // 4.10
 test('a valid post can be added', async () => {
-  const users = await User.find({})
-  const userId = users[0]._id.toString()
+  const token = await getToken('root', 'password')
 
   const newBlog = {
     title: 'New Entry Title',
     author: 'New entry author',
     url: 'new url',
-    likes: 10,
-    userId: userId
+    likes: 10
   }
 
   await api
     .post('/api/blogs')
+    .set({ Authorization: `bearer ${token}` })
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -66,6 +72,8 @@ test('likes defaults to 0', async () => {
   const users = await User.find({})
   const userId = users[0]._id.toString()
 
+  const token = await getToken('root', 'password')
+
   const newBlog = {
     title: 'New Entry Title',
     author: 'New entry author',
@@ -76,6 +84,7 @@ test('likes defaults to 0', async () => {
 
   const response = await api
     .post('/api/blogs')
+    .set({ Authorization: `bearer ${token}` })
     .send(newBlog)
 
   expect(response.body.likes).toBe(0)
@@ -85,6 +94,9 @@ test('likes defaults to 0', async () => {
 test('invalid blog request', async () => {
   const users = await User.find({})
   const userId = users[0]._id.toString()
+
+  const token = await getToken('root', 'password')
+
   const newBlog = {
     url: 'new url',
     likes: 0,
@@ -93,6 +105,7 @@ test('invalid blog request', async () => {
 
   await api
     .post('/api/blogs')
+    .set({ Authorization: `bearer ${token}`})
     .send(newBlog)
     .expect(400)
 })
@@ -103,8 +116,12 @@ test('delete blog', async () => {
   const blogs = response.body
   const id = blogs[0].id
   const expectedTitle = blogs[0].title
+
+  const token = await getToken('root', 'password')
+
   await api
     .delete(`/api/blogs/${id}`)
+    .set({ Authorization: `bearer ${token}` })
     .send()
     .expect(204)
 
@@ -139,13 +156,16 @@ test('blog entries should have `user` field', async () => {
 // TODO make refactor this to be flexible
 beforeEach(async () => {
   await User.deleteMany({})
-  let user = new User({ username: 'root', password: 'password' })
-  user = await user.save()
+  let user = { username: 'root', password: 'password' }
+  const response = await api
+    .post('/api/users')
+    .send(user)
+  user = response.body
 
   await Blog.deleteMany({})
   for (const blog of dummyData.blogs) {
     const blogObject = new Blog(blog)
-    blogObject.user = user._id.toString()
+    blogObject.user = user.id
     await blogObject.save()
   }
 })

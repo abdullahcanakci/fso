@@ -1,10 +1,10 @@
 post http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhlbGxhcyIsImlkIjoiNWQ2NjY1YzVjY2NkNjg2N2Q4ZTE3ZDcyIiwiaWF0IjoxNTY3MDA3ODY0fQ.feAIeuhASAmCo_d2IlK9bAf14pMSBwchblNt1FL2tKg
 
 {
-    "title": "Front page of the web",
+    "title": "New Front page of the web",
     "author": "i3c",
     "url": "example.com",
-    "likes": "50",
-    "userId": "5d6665c5cccd6867d8e17d72"
+    "likes": "50"
 }
