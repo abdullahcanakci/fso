@@ -73,6 +73,7 @@ test('invalid blog request', async () => {
     .expect(400)
 })
 
+// 4.13
 test('delete blog', async () => {
   const response = await api.get('/api/blogs')
   const blogs = response.body
@@ -89,6 +90,7 @@ test('delete blog', async () => {
   expect(titles).not.toContain(expectedTitle)
 })
 
+// 4.14
 test('update blogs', async () => {
   const response = await api.get('/api/blogs')
   const blog = response.body[0]
