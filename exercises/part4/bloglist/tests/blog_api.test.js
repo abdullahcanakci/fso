@@ -2,7 +2,9 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const dummyData = require('./dummy_data')
+const logger = require('../utils/logger')
 
 const api = supertest(app)
 
@@ -35,7 +37,16 @@ test('id field is avaible', async () => {
 
 // 4.10
 test('a valid post can be added', async () => {
-  const newBlog = new Blog(dummyData.newBlog)
+  const users = await User.find({})
+  const userId = users[0]._id.toString()
+
+  const newBlog = {
+    title: 'New Entry Title',
+    author: 'New entry author',
+    url: 'new url',
+    likes: 10,
+    userId: userId
+  }
 
   await api
     .post('/api/blogs')
@@ -52,24 +63,37 @@ test('a valid post can be added', async () => {
 
 // 4.11
 test('likes defaults to 0', async () => {
-  const newBlog = dummyData.newBlog
-  delete newBlog.likes
-  const blogObject = new Blog(newBlog)
+  const users = await User.find({})
+  const userId = users[0]._id.toString()
+
+  const newBlog = {
+    title: 'New Entry Title',
+    author: 'New entry author',
+    url: 'new url',
+    likes: 0,
+    userId: userId
+  }
+
   const response = await api
     .post('/api/blogs')
-    .send(blogObject)
+    .send(newBlog)
 
   expect(response.body.likes).toBe(0)
 })
 
 // 4.12
 test('invalid blog request', async () => {
-  const newBlog = dummyData.newBlog
-  delete newBlog.title
-  delete newBlog.url
+  const users = await User.find({})
+  const userId = users[0]._id.toString()
+  const newBlog = {
+    url: 'new url',
+    likes: 0,
+    userId: userId
+  }
+
   await api
     .post('/api/blogs')
-    .send(new Blog(newBlog))
+    .send(newBlog)
     .expect(400)
 })
 
@@ -104,11 +128,24 @@ test('update blogs', async () => {
   expect(newResponse.body.likes).toBe(1001)
 })
 
+test('blog entries should have `user` field', async () => {
+  const blogs = await Blog.find({})
+  const blog = blogs[0]
+  const users = await User.find({})
+  expect(blog.user).toBeDefined()
+  expect(blog.user._id.toString()).toBe(users[0]._id.toString())
+})
+
 // TODO make refactor this to be flexible
 beforeEach(async () => {
+  await User.deleteMany({})
+  let user = new User({ username: 'root', password: 'password' })
+  user = await user.save()
+
   await Blog.deleteMany({})
   for (const blog of dummyData.blogs) {
     const blogObject = new Blog(blog)
+    blogObject.user = user._id.toString()
     await blogObject.save()
   }
 })
