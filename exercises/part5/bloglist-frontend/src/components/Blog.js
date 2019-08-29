@@ -1,9 +1,9 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import './Blog.css'
-const Blog = ({ blog, onUpvote, onDelete, deleteVisibility}) => {
+const Blog = ({ blog, onUpvote, onDelete, deleteVisibility }) => {
   const [detail, setDetail] = useState(false)
-  const displayState = {display: detail ? '' : 'none'}
-  const dButVis = { display: deleteVisibility ? '' : 'none'}
+  const displayState = { display: detail ? '' : 'none' }
+  const dButVis = { display: deleteVisibility ? '' : 'none' }
 
 
   const handleUpvote = (event) => {
@@ -28,7 +28,7 @@ const Blog = ({ blog, onUpvote, onDelete, deleteVisibility}) => {
         <button onClick={handleDelete} style={dButVis}>delete</button>
       </div>
     </div>
-  
+
   )
 }
 

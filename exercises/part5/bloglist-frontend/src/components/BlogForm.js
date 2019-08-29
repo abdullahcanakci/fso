@@ -1,6 +1,6 @@
 import React from 'react'
 
-const BlogForm= ({onSubmit, blog, setBlog}) => {
+const BlogForm= ({ onSubmit, blog, setBlog }) => {
   return (
     <form onSubmit={onSubmit}>
       <h3>create new</h3>

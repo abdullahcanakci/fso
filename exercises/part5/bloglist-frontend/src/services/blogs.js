@@ -36,7 +36,7 @@ const deleteBlog = (targetObject) => {
     headers: { Authorization: token }
   }
   return axios.delete(`${baseUrl}/${targetObject.id}`, config)
-  
+
 }
 
 export default { getAll, create, update, upvote, deleteBlog, setToken }
