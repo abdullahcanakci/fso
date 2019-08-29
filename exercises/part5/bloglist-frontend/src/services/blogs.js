@@ -26,4 +26,17 @@ const update = (id, newObject) => {
   return request.then(response => response.date)
 }
 
-export default { getAll, create, update, setToken }
+const upvote = (targetObject) => {
+  const request = axios.put(`${baseUrl}/${targetObject.id}`, { ...targetObject, likes: targetObject.likes + 1 })
+  return request.then(response => response.data)
+}
+
+const deleteBlog = (targetObject) => {
+  const config = {
+    headers: { Authorization: token }
+  }
+  return axios.delete(`${baseUrl}/${targetObject.id}`, config)
+  
+}
+
+export default { getAll, create, update, upvote, deleteBlog, setToken }

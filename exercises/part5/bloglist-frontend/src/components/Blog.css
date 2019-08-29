@@ -1,0 +1,12 @@
+.title {
+  padding-left: 32px;
+}
+
+.blog_container{
+  padding: 8px;
+  border-bottom: 1px solid turquoise;
+}
+
+.detail {
+padding: 8px;
+}
