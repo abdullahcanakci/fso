@@ -2,7 +2,6 @@ import React from 'react'
 import Blog from './Blog'
 
 const BlogList = ({ blogs, onUpvote, onDelete, username }) => {
-  console.log('username is ' + username)
   const blogViews = blogs.map(blog =>
     <Blog
       key={blog.id}
