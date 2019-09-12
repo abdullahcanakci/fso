@@ -19,33 +19,35 @@ const Anecdote = ({ anecdote, handleClick }) => {
 
 const Anecdotes = (props) => {
   console.log('Anecdotes redraw')
-  let anecdotes = props.anecdotes
-  anecdotes = anecdotes.filter(a => a.content.includes(props.filter))
-  anecdotes = anecdotes.sort((a,b) => b.votes - a.votes)
-  const sortedAnecdotes = anecdotes.map(anecdote => {
+
+  const anecdoteViews = props.anecdotes.map(anecdote => {
     return (
       <Anecdote 
         key={anecdote.id} 
         anecdote={anecdote} 
         handleClick={() => {
-          props.vote(anecdote.id)
-          props.notify(`Voted ${anecdote.content}`)
-          setTimeout(() => {props.notify('')}, 1000)
+          props.vote(anecdote)
+          props.notify(`Voted ${anecdote.content}`, 3)
         }} 
       />
     )
   })
   return (
     <div>
-      {sortedAnecdotes}
+      {anecdoteViews}
     </div>
   )
 }
 
+const filterAnecdotes = (anecdotes, filter) => {
+  let response = anecdotes.filter(a => a.content.includes(filter))
+  response = response.sort((a,b) => b.votes - a.votes)
+  return response
+}
+
 const mapStateToProps = (state) => {
   return {
-    anecdotes: state.anecdotes,
-    filter: state.filter
+    anecdotes: filterAnecdotes(state.anecdotes, state.filter)
   }
 }
 

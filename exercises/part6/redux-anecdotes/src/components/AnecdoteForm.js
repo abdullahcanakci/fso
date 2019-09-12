@@ -1,14 +1,14 @@
 import React from 'react'
 import  {connect} from 'react-redux'
-import {newAnecdote} from './../reducers/anecdoteReducer'
+import {createAnecdote} from './../reducers/anecdoteReducer'
 
 
 const AnecdoteForm = (props) => {
-  const addAnecdote = (e) => {
+  const addAnecdote = async (e) => {
     e.preventDefault()
-    const content = e.target.anecdote.value
-    props.newAnecdote(content)
+    const a = e.target.anecdote.value
     e.target.anecdote.value = ''
+    props.createAnecdote(a)
   }
 
   return (
@@ -22,4 +22,4 @@ const AnecdoteForm = (props) => {
   )
 }
 
-export default connect(null, {newAnecdote}) (AnecdoteForm)
+export default connect(null, {createAnecdote}) (AnecdoteForm)
